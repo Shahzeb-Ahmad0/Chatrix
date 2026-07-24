@@ -59,6 +59,8 @@ function Home() {
           socket.connect();
         }
 
+        socket.emit("requestOnlineUsers");
+
       } catch (err) {
         console.error(err);
      
