@@ -20,12 +20,7 @@ function MessageInput({ onSend }) {
 
       <div className="flex items-center gap-2">
 
-        <button className="rounded-lg p-2 hover:bg-zinc-800">
-          <Paperclip
-            size={20}
-            className="text-zinc-400"
-          />
-        </button>
+
 
         <input
           value={text}
