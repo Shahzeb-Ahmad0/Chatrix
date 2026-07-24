@@ -23,7 +23,7 @@ function Sidebar({ selectedUser, onSelectUser, onlineUsers }) {
   async function loggedOut() {
     try {
       const response = await axios.get(
-        "http://localhost:8000/api/logout",
+        `${import.meta.env.VITE_API_URL}/api/logout`,
         {
           withCredentials: true,
         }
@@ -31,8 +31,6 @@ function Sidebar({ selectedUser, onSelectUser, onlineUsers }) {
 
       if (response.data.success) {
         navigate("/login");
-      } else {
-        console.log(response.data);
       }
     } catch (err) {
       console.log(err);
@@ -43,7 +41,7 @@ function Sidebar({ selectedUser, onSelectUser, onlineUsers }) {
     async function fetchUsers() {
       try {
         const response = await axios.get(
-          "http://localhost:8000/api/users",
+          `${import.meta.env.VITE_API_URL}/api/users`,
           {
             withCredentials: true,
           }
@@ -95,22 +93,13 @@ function Sidebar({ selectedUser, onSelectUser, onlineUsers }) {
 
                   <button
                     className="block w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-zinc-800"
-                    onClick={() => {
-                      // Clear Chat
-                    }}
+                    onClick={loggedOut}
                   >
-                    Clear Chat
+                    LogOut
                   </button>
                 </div>
               )}
           </div>
-
-          <button
-            onClick={loggedOut}
-            className="rounded-lg p-2 text-zinc-400 transition hover:bg-zinc-800 hover:text-white"
-          >
-            <LogOut size={20} />
-          </button>
         </div>
 
       </div>

@@ -11,7 +11,8 @@ import {
   AvatarImage,
 } from "@/components/ui/avatar";
 
-function RightSidebar({ user, setActiveView }) {
+function RightSidebar({ user, setActiveView ,onlineUsers}) {
+  const isOnline = onlineUsers?.includes(user._id);
   return (
     <aside className="flex h-full w-full flex-col border-l border-zinc-800 bg-zinc-900">
 
@@ -42,24 +43,24 @@ function RightSidebar({ user, setActiveView }) {
       <div className="flex flex-col items-center p-8">
 
         <Avatar className="h-28 w-28">
-          <AvatarImage src={user.avatar} />
+          <AvatarImage src={user.profilePic} />
           <AvatarFallback>
             {user.username[0]}
           </AvatarFallback>
         </Avatar>
 
         <h3 className="mt-4 text-xl font-semibold text-white">
-          {user.name}
+          {user.username}
         </h3>
 
         <p
           className={`mt-2 text-sm ${
-            user.online
+            isOnline
               ? "text-green-400"
               : "text-zinc-500"
           }`}
         >
-          {user.online ? "Online" : "Offline"}
+          {isOnline ? "Online" : "Offline"}
         </p>
 
       </div>
@@ -74,7 +75,7 @@ function RightSidebar({ user, setActiveView }) {
           </p>
 
           <p className="text-zinc-300">
-            Hey there! 👋 I'm using Chatrix.
+            {user.bio || "Hey there! 👋 I'm using Chatrix."}
           </p>
         </div>
 

@@ -24,14 +24,13 @@ function ChatContainer({
     async function fetchMessages() {
       try {
         const response = await axios.get(
-          `http://localhost:8000/api/getmessages/${user._id}`,
+          `${import.meta.env.VITE_API_URL}/api/getmessages/${user._id}`,
           {
             withCredentials: true,
           }
         );
 
         if (response.data.success) {
-          console.log(response.data)
           setMessages(response.data.messages);
         }
       } catch (err) {
@@ -73,7 +72,7 @@ function ChatContainer({
   async function sendMessage(text) {
     try {
       const response = await axios.post(
-        `http://localhost:8000/api/sendmessage/${user._id}`,
+        `${import.meta.env.VITE_API_URL}/api/sendmessage/${user._id}`,
         {
           text,
         },
@@ -87,10 +86,6 @@ function ChatContainer({
           ...prev,
           response.data.newMessage,
         ]);
-
-        console.log("Current User:", currentUser);
-        console.log("Selected User:", user);
-        console.log("Messages:", response.data.messages);
       }
     } catch (err) {
       console.log(err);

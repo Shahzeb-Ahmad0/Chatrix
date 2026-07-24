@@ -13,15 +13,12 @@ import Message from "./model/message.js"
 import { Server } from "socket.io";
 import cloudinary from "./utils/cloudinary.js"
 import multer from "multer";
-import streamifier from "streamifier";
 import { Readable } from "stream";
+import MongoStore from "connect-mongo";
 
 
 const app = express();
 const server = http.createServer(app);
-
-
-
 
 const io = new Server(server,{
     cors:{
@@ -49,12 +46,6 @@ io.on('connection', (socket) => {
   })
 });
 
-
-const upload = multer({
-  storage: multer.memoryStorage(),
-});
-
-
 app.set('trust proxy', 1);
 
 app.use(cors({
@@ -64,16 +55,30 @@ app.use(cors({
 app.use(express.urlencoded({extended:true}));
 app.use(express.json());
 
+const store = MongoStore.create({
+    mongoUrl:process.env.MONGO_URL,
+    crypto: {
+        secret:process.env.SESSION_SECRET,
+    },
+    touchAfter:24 * 3600,
+})
+
 app.use(session({
+    store,
     secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     cookie : {
-        expires:Date.now() + 7 * 24 * 60 * 60 * 1000,
         maxAge: 7 * 24 * 60 * 60 * 1000,
         httpOnly: true,
+        secure: process.env.NODE_ENV === "production",   // cookie only over HTTPS
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     }
 }));
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+});
 
 
 app.use(passport.initialize());
@@ -291,8 +296,6 @@ app.put("/api/profile",upload.single("image"),async (req, res) => {
       }
 
       const { bio } = req.body;
-      console.log("Body:", req.body);
-      console.log("File:", req.file);
 
       const updatedData = {};
 
@@ -325,6 +328,8 @@ app.put("/api/profile",upload.single("image"),async (req, res) => {
         }
       );
 
+      console.log("After image upload");
+
       res.json({
         success: true,
         user,
@@ -332,6 +337,11 @@ app.put("/api/profile",upload.single("image"),async (req, res) => {
 
     } catch (err) {
      console.error(err);
+
+     return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
     }
   }
 );

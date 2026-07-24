@@ -1,17 +1,21 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import Notification from "./Notification";
 
-function Profile({ user, setUser }) {
-  const [username, setUsername] = useState(user?.username || "");
-  const [bio, setBio] = useState(user?.bio || "");
+function Profile() {
+  const [username, setUsername] = useState("");
+  const [bio, setBio] = useState("");
   const [image, setImage] = useState(null);
+  const [userData,setUserData] = useState({});
+  const [loading,setLoading] = useState(false);
+  const [notification, setNotification] = useState(null);
 
-  const [preview, setPreview] = useState(
-    user?.profilePic ||
-      "https://ui-avatars.com/api/?background=18181b&color=fff"
-  );
+  const navigate = useNavigate();
+
+  const [preview, setPreview] = useState();
 
   const handleImage = (e) => {
     const file = e.target.files[0];
@@ -23,6 +27,8 @@ function Profile({ user, setUser }) {
   };
 
   const handleSubmit = async (e) => {
+    setLoading(true);
+
     e.preventDefault();
 
     try {
@@ -36,7 +42,7 @@ function Profile({ user, setUser }) {
       }
 
       const data = await axios.put(
-        "http://localhost:8000/api/profile",
+        `${import.meta.env.VITE_API_URL}/api/profile`,
         formData,
         {
           withCredentials: true,
@@ -47,24 +53,68 @@ function Profile({ user, setUser }) {
       );
 
       if (data.data.success) {
-        setUser(data.data.user);
 
-        setPreview(data.user.profilePic);
+        setPreview(data.data.user.profilePic);
         setImage(null);
+        setLoading(false);
 
-        alert("Profile Updated");
+        setNotification({
+            type: "success",
+            message: "Profile updated",
+        });
+
+        setTimeout(() => {
+          setNotification(null);
+        }, 2500);
       }
     } catch (err) {
       console.log(err.response?.data?.message);
     }
   };
 
+
+  useEffect(() => {
+
+    async function checkAuth() {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/auth`,
+          {
+            withCredentials: true,
+          }
+        );
+
+        if (!response.data.loggedIn) {
+          navigate("/login");
+          return;
+        }
+        else {
+          setUserData(response.data.user);
+        }
+
+      } catch (err) {
+        console.error(err);
+     
+      }
+    }
+
+    checkAuth();
+  }, []);
+
+  
   return (
     <div className="min-h-screen bg-zinc-950 flex justify-center items-center p-6">
+      {notification && (
+        <Notification
+          type={notification.type}
+          message={notification.message}
+        />
+      )}
       <form
         onSubmit={handleSubmit}
         className="bg-zinc-900 w-full max-w-lg rounded-2xl p-8 border border-zinc-800"
-      >
+        >
+        {loading?<h1 className="flex justify-center items-center text-lg text-white">Please wait for a moment</h1>:null}
         <h1 className="flex flex-col text-2xl font-bold text-white mb-8">
           Edit Profile
 
@@ -77,7 +127,7 @@ function Profile({ user, setUser }) {
 
         <div className="flex flex-col items-center mb-8">
           <img
-            src={preview}
+            src={preview || userData.profilePic || "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQhslR_IBbWqq6aKDwSybRj5I7kZnEI5Rhd_g&s"}
             alt="Profile"
             className="w-32 h-32 rounded-full object-cover border-4 border-zinc-700"
           />
@@ -96,6 +146,10 @@ function Profile({ user, setUser }) {
 
 
         {/* Bio */}
+
+        <h1 className="text-zinc-300 mb-2 block">
+            Name:  <span className="text-lg ">{userData.username}</span>
+        </h1>
 
         <div className="mb-8">
           <label className="text-zinc-300 mb-2 block">

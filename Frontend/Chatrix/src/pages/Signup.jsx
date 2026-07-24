@@ -10,6 +10,7 @@ import {
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Notification from "./Notification";
 
 
 function Signup() {
@@ -19,6 +20,7 @@ function Signup() {
     email:"",
     password:"",
   });
+  const [notification, setNotification] = useState(null);
 
   const navigate = useNavigate();
 
@@ -40,12 +42,21 @@ function Signup() {
    async function sendDataBackend(data) {
 
     try {
-      let response = await axios.post('http://localhost:8000/api/signup',data,{
+      let response = await axios.post(`${import.meta.env.VITE_API_URL}/api/signup`,data,{
         withCredentials:true,
       })
       
       if(response.data.success) {
-        navigate('/');
+
+        setNotification({
+            type: "success",
+            message: "Signup Successfull",
+        });
+
+        setTimeout(() => {
+          navigate('/');
+        }, 2000);
+
         setFormData({
           username: "",
           email: "",
@@ -53,6 +64,17 @@ function Signup() {
         })
       }
       else {
+
+        setNotification({
+            type: "error",
+            message: "Signup Failed",
+        });
+
+        setTimeout(() => {
+          setNotification(null)
+        }, 2000);
+
+
         setFormData({
           username: "",
           email: "",
@@ -62,6 +84,13 @@ function Signup() {
       }
     }
     catch(e) {
+      setNotification({
+            type: "error",
+            message: e.response?.data?.message,
+      });
+      setTimeout(() => {
+          setNotification(null)
+      }, 2500);
       console.log(e.response?.data?.message);
       console.log(e);
     }
@@ -70,6 +99,12 @@ function Signup() {
 
   return (
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center px-4 py-8">
+      {notification && (
+        <Notification
+          type={notification.type}
+          message={notification.message}
+        />
+      )}
 
       <div className="w-full max-w-6xl bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl grid lg:grid-cols-2">
 

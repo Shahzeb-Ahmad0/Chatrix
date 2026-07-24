@@ -39,7 +39,7 @@ function Login() {
   async function sendDataBackend(data) {
 
     try {
-      let response = await axios.post('http://localhost:8000/api/login',data,{
+      let response = await axios.post(`${import.meta.env.VITE_API_URL}/api/login`,data,{
         withCredentials:true,
       })
 
@@ -82,7 +82,7 @@ function Login() {
     <>
 
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center px-4 py-8">
-           {notification && (
+      {notification && (
         <Notification
           type={notification.type}
           message={notification.message}

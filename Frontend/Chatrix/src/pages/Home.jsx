@@ -36,11 +36,13 @@ function Home() {
     async function checkAuth() {
       try {
         const response = await axios.get(
-          "http://localhost:8000/api/auth",
+          `${import.meta.env.VITE_API_URL}/api/auth`,
           {
             withCredentials: true,
           }
         );
+
+        if (!isMounted) return;
 
         if (!response.data.loggedIn) {
           navigate("/login");
@@ -48,37 +50,33 @@ function Home() {
         }
 
         const user = response.data.user;
-
         setCurrentUser(user);
 
-        socket.io.opts.query = {
-          userId: user._id,
-        };
 
         
         if (!socket.connected) {
+          socket.io.opts.query = { userId: user._id };
           socket.connect();
         }
 
-    
-        socket.on("getOnlineUsers", (users) => {
-          console.log("Online Users:", users);
-          if (isMounted) {
-            setOnlineUsers(users);
-          }
-        });
       } catch (err) {
         console.error(err);
      
       }
     }
 
+      socket.on("getOnlineUsers", (users) => {
+          console.log("Online Users:", users);
+          if (isMounted) {
+            setOnlineUsers(users);
+          }
+      });
+
     checkAuth();
 
     return () => {
       isMounted = false;
       socket.off("getOnlineUsers");
-      socket.disconnect();
     };
   }, [navigate]);
 
@@ -113,7 +111,7 @@ function Home() {
         ) : (
           <div className="border-l border-zinc-800 bg-zinc-900" />
         )}
-
+        
       </div>
 
       {/* ---------------- Tablet ---------------- */}

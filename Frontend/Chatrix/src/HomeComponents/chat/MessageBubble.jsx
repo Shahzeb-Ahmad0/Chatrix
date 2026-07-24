@@ -6,9 +6,6 @@ function MessageBubble({ message, myId }) {
     minute: "2-digit",
   });
 
-  console.log(message.senderId);
-  console.log(myId);
-  console.log(message.senderId === myId);
 
   return (
     <div
