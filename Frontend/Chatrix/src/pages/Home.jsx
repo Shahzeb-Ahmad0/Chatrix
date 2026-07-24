@@ -129,7 +129,7 @@ function Home() {
         {selectedUser ? (
           <ChatContainer
             user={selectedUser}
-            currUser={currentUser}
+            currentUser={currentUser}
             showProfile={showProfile}
             setShowProfile={setShowProfile}
             onlineUsers={onlineUsers}
